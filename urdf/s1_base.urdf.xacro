@@ -1,0 +1,101 @@
+<robot name="pf1s1" xmlns:xacro="http://www.ros.org/wiki/xacro">
+    <xacro:property name="PI" value="3.1415926"/>
+
+    <!-- Base -->
+    <xacro:property name="base_footprint_radius" value="0.001" />
+    <xacro:property name="base_link_width" value="0.20" />
+    <xacro:property name="base_link_length" value="0.30" />
+    <xacro:property name="base_link_height" value="0.055" />
+    <xacro:property name="earth_space" value="0.06" /> <!-- Ground clearance -->
+
+    <link name="base_footprint">
+    <visual>
+        <geometry>
+            <sphere radius="${base_footprint_radius}" />
+        </geometry>
+    </visual>
+    </link>
+
+    <link name="base_link">
+    <visual>
+        <geometry>
+            <box size="${base_link_length} ${base_link_width} ${base_link_height}" />
+        </geometry>
+        <origin xyz="0 0 0" rpy="0 0 0" />
+        <material name="baselink_color">
+            <color rgba="1.0 0.5 0.2 0.5" />
+        </material>
+    </visual>
+    </link>
+
+    <joint name="link2footprint" type="fixed">
+        <parent link="base_footprint" />
+        <child link="base_link" />
+        <origin xyz="0 0 ${earth_space + base_link_height / 2 }" />
+    </joint>
+
+    <!-- Power Wheel -->
+    <xacro:property name="wheel_radius" value="0.0325" />
+    <xacro:property name="wheel_width" value="0.027" />
+    <xacro:property name="wheel_offset_y" value="0.005" />
+    <xacro:property name="wheel_offset_z" value="${wheel_radius * 2 - earth_space}" />
+    <xacro:property name="wheel_joint_y" value="${base_link_width / 2 + wheel_offset_y}" />
+    <xacro:property name="wheel_joint_z" value="${(earth_space - wheel_offset_z) * -1}" />
+
+    <xacro:macro name="add_wheels" params="name flag">
+    <link name="${name}_wheel">
+        <visual>
+        <geometry>
+            <cylinder radius="${wheel_radius}" length="${wheel_width}" />
+        </geometry>
+        <origin xyz="0.0 0.0 0.0" rpy="${PI / 2} 0.0 0.0" />
+        <material name="black">
+            <color rgba="0 0 0 0.5" />
+        </material>
+        </visual>
+    </link>
+
+    <joint name="${name}_wheel2link" type="continuous">
+        <parent link="base_link" />
+        <child link="${name}_wheel" />
+        <origin xyz="0 ${wheel_joint_y * flag} ${wheel_joint_z}" rpy="0 0 0" />
+        <axis xyz="0 1 0" />
+    </joint>
+
+    </xacro:macro>
+
+    <xacro:add_wheels name="left" flag="1" />
+    <xacro:add_wheels name="right" flag="-1" />
+
+    <!-- Support Wheel -->
+    <xacro:property name="support_wheel_radius" value="0.025" />
+    <xacro:property name="support_offset_x" value="0.05" />
+    <xacro:property name="support_offset_z" value="0.0035" />  <!-- Just feel it and keep the support wheels on the ground -->
+    <xacro:property name="support_joint_x" value="${base_link_length / 2 - support_offset_x}" />
+    <xacro:property name="support_joint_z" value="${(earth_space + support_offset_z) * -1}" />
+
+    <xacro:macro name="add_support_wheel" params="name flag" >
+    <link name="${name}_wheel">
+        <visual>
+            <geometry>
+                <sphere radius="${support_wheel_radius}" />
+            </geometry>
+            <origin xyz="0 0 0" rpy="0 0 0" />
+            <material name="black">
+                <color rgba="0 0 0 0.5" />
+            </material>
+        </visual>
+    </link>
+
+    <joint name="${name}_wheel2base_link" type="continuous">
+        <parent link="base_link" />
+        <child link="${name}_wheel" />
+        <origin xyz="${support_joint_x * flag} 0 ${support_joint_z}" rpy="0 0 0" />
+        <axis xyz="0 1 0" />
+    </joint>
+    </xacro:macro>
+
+    <xacro:add_support_wheel name="front" flag="1" />
+    <xacro:add_support_wheel name="back" flag="-1" />
+
+</robot>

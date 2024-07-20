@@ -1,0 +1,5 @@
+<robot name="pf1s1" xmlns:xacro="http://wiki.ros.org/xacro">
+    <xacro:include filename="s1_base.urdf.xacro" />
+    <xacro:include filename="s1_camera.urdf.xacro" />
+    <xacro:include filename="s1_laser.urdf.xacro" />
+</robot>
